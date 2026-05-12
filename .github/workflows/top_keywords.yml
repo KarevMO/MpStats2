@@ -1,0 +1,29 @@
+name: Top keywords
+
+on:
+  repository_dispatch:
+    types: [run_mpstats_manual] # Слушаем сигнал от Google Таблицы
+
+jobs:
+  run-sync:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run script
+        env:
+          TOKEN: ${{ secrets.TOKEN }}
+          # Передаем параметры из таблицы в скрипт
+          CATEGORY_PATH: ${{ github.event.client_payload.category }}
+          DATE_FROM: ${{ github.event.client_payload.date_from }}
+          DATE_TO: ${{ github.event.client_payload.date_to }}
+        run: python Top_keywords_for_google_sheets.py
