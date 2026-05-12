@@ -1,0 +1,27 @@
+name: category_analytics
+
+on:
+  repository_dispatch:
+    types: [calculate_metrics]
+
+jobs:
+  run-metrics:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          pip install requests pandas gspread oauth2client python-dotenv
+
+      - name: Run calculation script
+        env:
+          WEBHOOK_URL_AC: ${{ secrets.WEBHOOK_URL_AC }}
+          GDRIVE_SERVICE_ACCOUNT_JSON: ${{ secrets.GDRIVE_SERVICE_ACCOUNT_JSON }}
+          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }} # Ссылка (ID) на вашу Google таблицу
+          # Достаем переменные из пейлоада:
+          CATEGORY: ${{ github.event.client_payload.category }}
+        run: python category_analytics.py
